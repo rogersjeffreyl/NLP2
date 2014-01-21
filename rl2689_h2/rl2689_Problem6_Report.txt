@@ -1,0 +1,68 @@
+Steps Summary:
+
+1) python hw2/count_cfg_freq.py parse_train_vert.dat >vert.counts
+2) python 4.py vert.counts parse_train_vert.dat  parse_train_modified_vert.dat
+3) python hw2/count_cfg_freq.py parse_train_modified_vert.dat >vert_modified.counts
+4) python 6.py vert_modified.counts  parse_dev.dat  parse_dev_vert_modified.dat
+5) python hw2/eval_parser.py parse_dev_vert_modified.dat parse_dev.key
+
+
+Steps:
+
+1) Generate the  count file for the vertical markovized parse trees using the count_cfg_freq.py script
+2) Generate new parse trees from the training ata where words whose counts are lesser than 5 are replaced  with '_RARE_'
+3) Generate the modified counts file  from the training file with _RARE_ symbols
+4) Run the cky algorithm  with the dev data file modified counts file and  the name of the  parsed dev data file as inputs
+   The cky algorithm runs for about 1 min and 15 sec
+5) Evaluate the performance using  the evaluator script
+
+
+      Type       Total   Precision      Recall     F1 Score
+===============================================================
+         .         370     1.000        1.000        1.000
+       ADJ         148     0.622        0.689        0.654
+      ADJP          37     0.414        0.324        0.364
+  ADJP+ADJ          22     0.591        0.591        0.591
+       ADP         202     0.951        0.960        0.956
+       ADV          55     0.656        0.764        0.706
+      ADVP          14     0.233        0.500        0.318
+  ADVP+ADV          48     0.660        0.729        0.693
+      CONJ          53     1.000        1.000        1.000
+       DET         168     0.994        0.988        0.991
+      NOUN         719     0.855        0.798        0.826
+        NP         784     0.548        0.617        0.580
+    NP+ADJ           3     0.500        0.333        0.400
+    NP+DET          18     0.810        0.944        0.872
+   NP+NOUN         141     0.656        0.610        0.632
+    NP+NUM           8     0.231        0.375        0.286
+   NP+PRON          50     0.980        0.980        0.980
+     NP+QP           4     0.273        0.750        0.400
+       NUM          74     0.688        0.865        0.766
+        PP         212     0.635        0.623        0.629
+      PRON          13     0.929        1.000        0.963
+       PRT          42     0.933        1.000        0.966
+   PRT+PRT           7     1.000        0.286        0.444
+        QP          20     0.500        0.650        0.565
+         S         669     0.811        0.712        0.758
+      SBAR          16     0.400        0.625        0.488
+      VERB         290     0.813        0.793        0.803
+        VP         406     0.677        0.665        0.671
+   VP+VERB           8     0.333        0.625        0.435
+
+     total        4664     0.744        0.744        0.744
+	 
+
+
+The derivation having the highest probability for rare words is returned when an word never seen before in the training data is encountered. This might not be right most of the times. Hence the parse tree generation for rare words is not accurate. On markovization, as we build the tree, the parents of the tree enforce the rare words which occur as their children to pick the derivation augmented with the parent. Thus, the markovization improves in the parsing of unseen words. As seen in the table above, the performance has considerably improved compared to CKY implemented in question 5(74.4% when compared to 71).
+
+Since the number of Nonterminals greatly increases an optimization has been made so that  in cky instead of running the rule binary finding loop for all  non terminals the  iteration is done over only the non terminals that have binary rules.  
+
+The parse tree of Line 105  : "Of course the state 's liberals are not yet a nation unto themselves ." has improved on vertical markovization. Again, as mentioned in the observation,
+
+Vertically Markovized CKY parse: ["S", ["NP^<S>", ["NOUN", "Of"], ["NOUN", "course"]], ["S", ["NP^<S>", ["DET", "the"], ["NP", ["NOUN", "state"], ["PRT", "'s"]]], ["S", ["VP^<S>", ["VERB", "liberals"], ["VP^<VP>", ["VERB", "are"], ["VP", ["ADV", "not"], ["VP^<VP>", ["ADVP^<VP>+ADV", "yet"], ["VP", ["NP^<VP>", ["DET", "a"], ["NOUN", "nation"]], ["PP^<VP>", ["ADP", "unto"], ["NP^<PP>+PRON", "themselves"]]]]]]], [".", "."]]]]
+
+
+Normal CKY parse: ["S", ["NP+NOUN", "Of"], ["S", ["NP+NOUN", "course"], ["S", ["NP", ["DET", "the"], ["NP", ["NOUN", "state"], ["PRT", "'s"]]], ["S", ["VP", ["VERB", "liberals"], ["VP", ["VERB", "are"], ["ADVP", ["ADV", "not"], ["ADV", "yet"]]]], ["S", ["NP", ["DET", "a"], ["NOUN", "nation"]], ["S", ["VP", ["VERB", "unto"], ["NP+PRON", "themselves"]], [".", "."]]]]]]]
+
+
+Here the word unto which is unseen or rare is assigned VERB in the second case, while it is attributed to ADP correctly in the markovized parse.

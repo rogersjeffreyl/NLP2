@@ -1,0 +1,12 @@
+Steps Summary
+
+1) python 4.py cfg.counts parse_train.dat parse_train_modified.dat
+  
+2) python hw2/count_cfg_freq.py  parse_train_modified.dat > cfg_modified.counts
+
+
+First run the script 4.py that replaces the  words in the fringe of the parse trees whose word count is less than 5 with "_RARE_". The new file is parse_train_modified.dat
+
+Run the counts generation  script  hw2/count_cfg_freq.py with input as the  modified training file(parse_train_modified.dat) and pipe the output to the new
+counts file (cfg_modified.counts) that has the count of new parse trees where rare words have been replaced with _RARE_
+
